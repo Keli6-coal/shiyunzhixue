@@ -294,7 +294,7 @@ async function generateSortQuestion() {
 }
 
 function selectAnswer(element, selected, correct) {
-    const options = document.querySelectorAll('.quiz-option');
+    const options = document.querySelectorAll('#questionOptions .quiz-option');
     options.forEach(opt => {
         opt.onclick = null;
         if (opt.textContent === correct) {
@@ -338,7 +338,7 @@ function selectSortAnswer(element, index) {
     
     if (currentQuiz.selected.length === currentQuiz.correct.length) {
         const selectedLines = currentQuiz.selected.map(i => {
-            const options = document.querySelectorAll('.quiz-option');
+            const options = document.querySelectorAll('#questionOptions .quiz-option');
             return options[i].getAttribute('data-line');
         });
         
@@ -362,7 +362,7 @@ function selectSortAnswer(element, index) {
         document.getElementById('quizResult').innerHTML = resultHtml;
         document.getElementById('nextBtn').style.display = 'inline-block';
         
-        document.querySelectorAll('.quiz-option').forEach(opt => opt.onclick = null);
+        document.querySelectorAll('#questionOptions .quiz-option').forEach(opt => opt.onclick = null);
         
         recordAnswer(isCorrect, {
             type: 'sort',
@@ -753,10 +753,11 @@ function recordAnswer(isCorrect, questionData) {
     users[currentUser].stats.totalAnswered = (users[currentUser].stats.totalAnswered || 0) + 1;
     if (isCorrect) {
         users[currentUser].stats.correctCount = (users[currentUser].stats.correctCount || 0) + 1;
+        saveUsers(users);
     } else {
         saveWrongQuestion(questionData);
+        return;
     }
-    saveUsers(users);
     updateUserStats();
 }
 
