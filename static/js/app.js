@@ -192,15 +192,30 @@ document.getElementById('poemModal').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
 });
 
+let quizQuestionCount = 0;
+
 function startQuiz(type) {
+    quizQuestionCount = 0;
     document.getElementById('quizStart').classList.add('hidden');
     document.getElementById('quizQuestion').classList.remove('hidden');
+    updateQuizProgress();
     
     if (type === 'fill_blank') {
         generateFillBlankQuestion();
     } else if (type === 'sort') {
         generateSortQuestion();
     }
+}
+
+function backToQuizStart() {
+    document.getElementById('quizStart').classList.remove('hidden');
+    document.getElementById('quizQuestion').classList.add('hidden');
+    quizQuestionCount = 0;
+}
+
+function updateQuizProgress() {
+    quizQuestionCount++;
+    document.getElementById('quizProgress').textContent = '第 ' + quizQuestionCount + ' 题';
 }
 
 async function generateFillBlankQuestion() {
@@ -355,6 +370,7 @@ function selectSortAnswer(element, index) {
 }
 
 function nextQuestion() {
+    updateQuizProgress();
     if (currentQuiz.type === 'fill_blank') {
         generateFillBlankQuestion();
     } else {
@@ -623,7 +639,7 @@ function updateUserStats() {
     const users = getUsers();
     const stats = users[currentUser].stats;
     document.getElementById('totalAnswered').textContent = stats.totalAnswered || 0;
-    document.getElementById('wrongCount').textContent = (stats.wrongQuestions || []).length;
+    document.getElementById('wrongCount').textContent = wrongQuestions.length;
     
     const total = stats.totalAnswered || 0;
     const correct = stats.correctCount || 0;
@@ -638,16 +654,11 @@ function saveWrongQuestion(question) {
         users[currentUser].stats.wrongQuestions = [];
     }
     
-    const exists = users[currentUser].stats.wrongQuestions.some(
-        q => q.title === question.title && q.type === question.type
-    );
-    
-    if (!exists) {
-        users[currentUser].stats.wrongQuestions.push({
-            ...question,
-            wrongTime: new Date().toISOString()
-        });
-    }
+    users[currentUser].stats.wrongQuestions.push({
+        ...question,
+        wrongTime: new Date().toISOString(),
+        id: Date.now() + Math.random()
+    });
     
     saveUsers(users);
     wrongQuestions = users[currentUser].stats.wrongQuestions;
