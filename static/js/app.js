@@ -210,7 +210,12 @@ function startQuiz(type) {
 function backToQuizStart() {
     document.getElementById('quizStart').classList.remove('hidden');
     document.getElementById('quizQuestion').classList.add('hidden');
+    document.getElementById('quizResult').innerHTML = '';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('questionOptions').innerHTML = '';
+    document.getElementById('questionText').textContent = '';
     quizQuestionCount = 0;
+    currentQuiz = null;
 }
 
 function updateQuizProgress() {
@@ -603,7 +608,7 @@ function login() {
     
     currentUser = username;
     localStorage.setItem('shiyunzhixue_currentUser', username);
-    wrongQuestions = users[username].stats.wrongQuestions || [];
+    wrongQuestions = [...(users[username].stats.wrongQuestions || [])];
     
     closeLoginModal();
     updateUIAfterLogin();
@@ -639,7 +644,7 @@ function updateUserStats() {
     const users = getUsers();
     const stats = users[currentUser].stats;
     document.getElementById('totalAnswered').textContent = stats.totalAnswered || 0;
-    document.getElementById('wrongCount').textContent = wrongQuestions.length;
+    document.getElementById('wrongCount').textContent = (stats.wrongQuestions || []).length;
     
     const total = stats.totalAnswered || 0;
     const correct = stats.correctCount || 0;
@@ -661,7 +666,7 @@ function saveWrongQuestion(question) {
     });
     
     saveUsers(users);
-    wrongQuestions = users[currentUser].stats.wrongQuestions;
+    wrongQuestions = [...users[currentUser].stats.wrongQuestions];
     updateUserStats();
     renderWrongQuestions();
 }
@@ -670,13 +675,16 @@ function renderWrongQuestions() {
     const container = document.getElementById('wrongQuestionsList');
     if (!container) return;
     
-    if (!currentUser || wrongQuestions.length === 0) {
+    const users = getUsers();
+    const questions = currentUser ? (users[currentUser].stats.wrongQuestions || []) : [];
+    
+    if (questions.length === 0) {
         container.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">暂无错题，继续加油！</p>';
         return;
     }
     
     let html = '';
-    wrongQuestions.forEach((q, index) => {
+    questions.forEach((q, index) => {
         if (q.type === 'fill_blank') {
             html += `
                 <div class="wrong-question-item">
