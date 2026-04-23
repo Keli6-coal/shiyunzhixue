@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诗韵智学 - 古诗词互动教学平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Serif SC', 'STSong', 'SimSun', serif;
+            background: #f5f5f0;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        /* ===== Hero Section ===== */
+        .hero {
+            position: relative;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500"><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23667;stop-opacity:0.3"/><stop offset="100%" style="stop-color:%2399a;stop-opacity:0.1"/></linearGradient></defs><rect fill="%23445" width="1200" height="500"/><path d="M0 400 Q200 300 400 350 T800 280 T1200 320 L1200 500 L0 500Z" fill="url(%23g1)"/><path d="M0 450 Q300 380 600 420 T1200 380 L1200 500 L0 500Z" fill="%23556" opacity="0.5"/></svg>');
+            background-size: cover;
+            background-position: center;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: #4caf50;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+        }
+
+        .logo-text {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2.5rem;
+            color: white;
+            letter-spacing: 8px;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 40px;
+            display: flex;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .search-box button {
+            padding: 16px 24px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #45a049;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .hero-stats span {
+            color: #4caf50;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        /* ===== Features ===== */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin: -40px auto 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 8px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* ===== Dynasty Section ===== */
+        .dynasty-section {
+            margin: 60px 0;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #4caf50;
+        }
+
+        .dynasty-grid {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .dynasty-btn {
+            padding: 12px 32px;
+            background: white;
+            border: 2px solid #4caf50;
+            color: #4caf50;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .dynasty-btn:hover {
+            background: #4caf50;
+            color: white;
+        }
+
+        /* ===== Poem Grid ===== */
+        .poem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .poem-card-bg {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23ddd;stop-opacity:0.3"/><stop offset="100%" style="stop-color:%23bbb;stop-opacity:0.1"/></linearGradient></defs><rect fill="url(%23bg)" width="400" height="280"/><path d="M0 200 Q100 150 200 180 T400 160 L400 280 L0 280Z" fill="%23ccc" opacity="0.2"/></svg>');
+            background-size: cover;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .poem-card-bg:hover {
+            transform: scale(1.02);
+        }
+
+        .poem-card-content {
+            padding: 24px;
+            background: rgba(255,255,255,0.95);
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .poem-card-content h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .poem-card-content .author {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .poem-card-content .excerpt {
+            color: #555;
+            line-height: 1.8;
+            flex: 1;
+            margin-bottom: 16px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tag {
+            padding: 4px 12px;
+            background: #e8f5e9;
+            color: #4caf50;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .view-btn {
+            padding: 8px 20px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            align-self: flex-start;
+            transition: background 0.3s;
+        }
+
+        .view-btn:hover {
+            background: #45a049;
+        }
+
+        /* ===== Page Header ===== */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 30px 0;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* ===== Filter Section ===== */
+        .filter-section {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-item label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .filter-item select,
+        .filter-item input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .filter-item input {
+            width: 200px;
+        }
+
+        .search-btn {
+            padding: 8px 20px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #45a049;
+        }
+
+        /* ===== Search Summary ===== */
+        .search-summary {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            color: #2e7d32;
+        }
+
+        /* ===== Poem List ===== */
+        .poem-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .poem-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: box-shadow 0.3s;
+        }
+
+        .poem-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .poem-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .poem-card .author {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .poem-card .content {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .detail-btn {
+            padding: 8px 20px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .detail-btn:hover {
+            background: #45a049;
+        }
+
+        /* ===== Loading & No Data ===== */
+        .loading,
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* ===== Pagination ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 30px;
+        }
+
+        .pagination button {
+            padding: 8px 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== Poem Detail ===== */
+        .poem-detail {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .poem-detail .title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .poem-detail .author {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .poem-detail .text {
+            text-align: center;
+            line-height: 2;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .poem-detail .notes,
+        .poem-detail .author-bio,
+        .poem-detail .analysis {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .poem-detail h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: #4caf50;
+        }
+
+        .poem-detail p {
+            line-height: 1.8;
+            color: #555;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 400px;
+                padding: 40px 16px;
+            }
+
+            .logo-text {
+                font-size: 2rem;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box button {
+                width: 100%;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-item input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <router-view></router-view>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, computed } = Vue;
+        const { createRouter, createWebHashHistory } = VueRouter;
+
+        // 数据存储
+        let allPoems = [];
+        let searchIndex = [];
+        let dataLoaded = false;
+
+        // 加载数据
+        async function loadData() {
+            if (dataLoaded) return;
+            
+            try {
+                console.log('正在加载数据...');
+                const response = await fetch('./data/poems.json');
+                allPoems = await response.json();
+                dataLoaded = true;
+                console.log(`数据加载完成，共 ${allPoems.length} 首诗词`);
+            } catch (e) {
+                console.error('数据加载失败:', e);
+            }
+        }
+
+        // 首页组件
+        const Home = {
+            template: `
+                <div>
+                    <div class="hero">
+                        <div class="hero-content">
+                            <div class="logo">
+                                <div class="logo-icon">📖</div>
+                                <div class="logo-text">诗韵智学</div>
+                            </div>
+                            <div class="search-box">
+                                <input type="text" v-model="searchKeyword" placeholder="搜索诗词、作者、名句..." @keyup.enter="doSearch">
+                                <button @click="doSearch">🔍</button>
+                            </div>
+                            <div class="hero-stats">
+                                <div>约 <span>{{ totalPoems }}</span> 篇作品</div>
+                                <div><span>2,000+</span> 位作者</div>
+                                <div><span>10,000+</span> 道题目</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="features">
+                        <div class="feature-card" @click="$router.push('/poems')">
+                            <div class="feature-icon">📚</div>
+                            <h3>诗词鉴赏</h3>
+                            <p>唐宋诗词、元曲明清诗，品味古今</p>
+                        </div>
+                        <div class="feature-card" @click="$router.push('/quiz')">
+                            <div class="feature-icon">✍️</div>
+                            <h3>古诗教学</h3>
+                            <p>适合学龄前、中小学及大专院校诗词教学</p>
+                        </div>
+                        <div class="feature-card" @click="$router.push('/game')">
+                            <div class="feature-icon">🎨</div>
+                            <h3>诗歌创作</h3>
+                            <p>熟读唐诗三百首，不会吟诗也会吟</p>
+                        </div>
+                        <div class="feature-card" @click="$router.push('/user')">
+                            <div class="feature-icon">💾</div>
+                            <h3>超大数据</h3>
+                            <p>超大规模古诗数据集，适合图书馆、科研单位参考</p>
+                        </div>
+                    </div>
+                    <div class="dynasty-section">
+                        <h2 class="section-title">朝代浏览</h2>
+                        <div class="dynasty-grid">
+                            <button class="dynasty-btn" @click="$router.push({path:'/poems', query:{dynasty:'唐'}})">唐朝</button>
+                            <button class="dynasty-btn" @click="$router.push({path:'/poems', query:{dynasty:'宋'}})">宋朝</button>
+                            <button class="dynasty-btn">元朝</button>
+                            <button class="dynasty-btn">明朝</button>
+                            <button class="dynasty-btn">清朝</button>
+                        </div>
+                    </div>
+                    <div class="poem-grid">
+                        <div class="poem-card-bg" @click="$router.push('/poem/1')">
+                            <div class="poem-card-content">
+                                <h3>静夜思</h3>
+                                <p class="author">[唐] 李白</p>
+                                <p class="excerpt">床前明月光，疑是地上霜。举头望明月，低头思故乡。</p>
+                                <div class="tags"><span class="tag">唐诗</span><span class="tag">五绝</span></div>
+                                <button class="view-btn">鉴赏</button>
+                            </div>
+                        </div>
+                        <div class="poem-card-bg" @click="$router.push('/poem/2')">
+                            <div class="poem-card-content">
+                                <h3>春晓</h3>
+                                <p class="author">[唐] 孟浩然</p>
+                                <p class="excerpt">春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。</p>
+                                <div class="tags"><span class="tag">唐诗</span><span class="tag">五绝</span></div>
+                                <button class="view-btn">鉴赏</button>
+                            </div>
+                        </div>
+                        <div class="poem-card-bg" @click="$router.push('/poem/3')">
+                            <div class="poem-card-content">
+                                <h3>登鹳雀楼</h3>
+                                <p class="author">[唐] 王之涣</p>
+                                <p class="excerpt">白日依山尽，黄河入海流。欲穷千里目，更上一层楼。</p>
+                                <div class="tags"><span class="tag">唐诗</span><span class="tag">五绝</span></div>
+                                <button class="view-btn">鉴赏</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const searchKeyword = ref('');
+                const totalPoems = ref(0);
+                
+                onMounted(async () => {
+                    await loadData();
+                    totalPoems.value = allPoems.length;
+                });
+                
+                const doSearch = () => {
+                    if (searchKeyword.value) {
+                        window.location.hash = '#/poems?keyword=' + encodeURIComponent(searchKeyword.value);
+                    }
+                };
+                return { searchKeyword, totalPoems, doSearch };
+            }
+        };
+
+        // 诗词库组件
+        const PoemLibrary = {
+            template: `
+                <div>
+                    <div class="page-header"><h1>诗词库</h1></div>
+                    <div class="filter-section">
+                        <div class="filter-item"><label>朝代：</label><select v-model="dynasty" @change="filterPoems"><option value="">全部</option><option value="唐">唐朝</option><option value="宋">宋朝</option></select></div>
+                        <div class="filter-item"><label>类型：</label><select v-model="type" @change="filterPoems"><option value="">全部</option><option value="诗">诗</option><option value="词">词</option></select></div>
+                        <div class="filter-item"><input type="text" v-model="keyword" placeholder="搜索诗词标题、作者、内容" @keyup.enter="handleSearch"><button class="search-btn" @click="handleSearch">搜索</button></div>
+                    </div>
+                    <div v-if="keyword" class="search-summary">
+                        <span>找到 <strong>{{ filteredPoems.length }}</strong> 首诗词</span>
+                        <span>关键字：<strong>{{ keyword }}</strong></span>
+                    </div>
+                    <div class="poem-list">
+                        <div v-for="poem in currentPagePoems" :key="poem.poem_id" class="poem-card">
+                            <h3>{{ poem.title }}</h3>
+                            <p class="author">[{{ poem.dynasty }}] {{ poem.author_name }}</p>
+                            <div class="content"><p v-for="(line, i) in (poem.content || []).slice(0, 4)" :key="i">{{ line }}</p></div>
+                            <button class="detail-btn" @click="$router.push('/poem/' + poem.poem_id)">查看详情</button>
+                        </div>
+                    </div>
+                    <div v-if="loading" class="loading">加载中...</div>
+                    <div v-if="!loading && filteredPoems.length === 0" class="no-data">暂无数据</div>
+                    <div class="pagination" v-if="filteredPoems.length > 0">
+                        <button @click="page--; filterPoems()" :disabled="page === 1">上一页</button>
+                        <span>{{ page }} / {{ totalPages }}</span>
+                        <button @click="page++; filterPoems()" :disabled="page >= totalPages">下一页</button>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const poems = ref([]);
+                const filteredPoems = ref([]);
+                const loading = ref(false);
+                const page = ref(1);
+                const size = ref(20);
+                const dynasty = ref('');
+                const type = ref('');
+                const keyword = ref('');
+                const totalPages = computed(() => Math.ceil(filteredPoems.value.length / size.value));
+                const currentPagePoems = computed(() => {
+                    const start = (page.value - 1) * size.value;
+                    return filteredPoems.value.slice(start, start + size.value);
+                });
+
+                const filterPoems = () => {
+                    page.value = 1;
+                    let result = allPoems;
+                    
+                    if (dynasty.value) {
+                        result = result.filter(p => p.dynasty === dynasty.value);
+                    }
+                    if (type.value) {
+                        result = result.filter(p => p.type === type.value);
+                    }
+                    if (keyword.value) {
+                        const kw = keyword.value.toLowerCase();
+                        result = result.filter(p => 
+                            p.title.toLowerCase().includes(kw) ||
+                            p.author_name.toLowerCase().includes(kw) ||
+                            (p.content || []).some(line => line.toLowerCase().includes(kw))
+                        );
+                    }
+                    
+                    filteredPoems.value = result;
+                };
+
+                const handleSearch = () => {
+                    filterPoems();
+                };
+
+                onMounted(async () => {
+                    loading.value = true;
+                    await loadData();
+                    filterPoems();
+                    loading.value = false;
+                    
+                    const hash = window.location.hash;
+                    const match = hash.match(/keyword=([^&]+)/);
+                    if (match) {
+                        keyword.value = decodeURIComponent(match[1]);
+                        handleSearch();
+                    }
+                });
+                return { poems, filteredPoems, loading, page, total: computed(() => filteredPoems.value.length), totalPages, dynasty, type, keyword, currentPagePoems, filterPoems, handleSearch };
+            }
+        };
+
+        // 诗词详情组件
+        const PoemDetail = {
+            template: `
+                <div>
+                    <div class="page-header"><button class="back-btn" @click="$router.back()">←</button><h1>诗词详情</h1></div>
+                    <div v-if="loading" class="loading">加载中...</div>
+                    <div v-else-if="poem" class="poem-detail">
+                        <h2 class="title">{{ poem.title }}</h2>
+                        <p class="author">[{{ poem.dynasty }}] {{ poem.author_name }}</p>
+                        <div class="text"><p v-for="(line, i) in poem.content" :key="i">{{ line }}</p></div>
+                        <div v-if="poem.zhushi" class="notes"><h3>注释</h3><p v-html="poem.zhushi"></p></div>
+                        <div v-if="poem.author_bio" class="author-bio"><h3>作者简介</h3><p>{{ poem.author_bio }}</p></div>
+                        <div class="analysis"><h3>赏析</h3><p>{{ poem.shangxi || '暂无赏析内容' }}</p></div>
+                    </div>
+                    <div v-else class="no-data">诗词不存在</div>
+                </div>
+            `,
+            setup() {
+                const poem = ref(null);
+                const loading = ref(true);
+
+                onMounted(async () => {
+                    await loadData();
+                    const poemId = parseInt(window.location.hash.split('/').pop());
+                    poem.value = allPoems.find(p => p.poem_id === poemId) || null;
+                    loading.value = false;
+                });
+                return { poem, loading };
+            }
+        };
+
+        // 路由配置
+        const routes = [
+            { path: '/', component: Home },
+            { path: '/poems', component: PoemLibrary },
+            { path: '/poem/:id', component: PoemDetail },
+        ];
+
+        const router = createRouter({
+            history: createWebHashHistory(),
+            routes,
+        });
+
+        const app = createApp({});
+        app.use(router);
+        app.mount('#app');
+    </script>
+</body>
+</html>
