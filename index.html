@@ -23,9 +23,19 @@
                     <p class="subtitle">古诗词互动教学平台</p>
                 </div>
             </div>
-            <div class="header-search">
-                <input type="text" id="headerSearchInput" placeholder="搜索诗词、作者、名句...">
-                <button onclick="searchFromHeader()">搜索</button>
+            <div class="header-right">
+                <div class="header-search">
+                    <input type="text" id="headerSearchInput" placeholder="搜索诗词、作者、名句...">
+                    <button onclick="searchFromHeader()">搜索</button>
+                </div>
+                <div class="user-auth" id="userAuth">
+                    <button class="btn-auth" onclick="showLoginModal()">登录</button>
+                    <button class="btn-auth btn-register" onclick="showRegisterModal()">注册</button>
+                </div>
+                <div class="user-info hidden" id="userInfo">
+                    <span class="username" id="displayUsername"></span>
+                    <button class="btn-logout" onclick="logout()">退出</button>
+                </div>
             </div>
         </div>
     </header>
@@ -161,27 +171,42 @@
                 <div class="section-header">
                     <h2>学习中心</h2>
                 </div>
-                <div class="user-stats">
-                    <div class="stat-card">
-                        <h3>连续打卡</h3>
-                        <div class="value">5天</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>答题总数</h3>
-                        <div class="value" id="totalAnswered">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>正确率</h3>
-                        <div class="value">75%</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>获得勋章</h3>
-                        <div class="value">3</div>
-                    </div>
+                <div id="userNotLogin" style="text-align:center;padding:60px 20px;">
+                    <p style="font-size:1.2rem;color:#666;margin-bottom:20px;">请先登录以查看学习数据</p>
+                    <button class="btn" onclick="showLoginModal()">立即登录</button>
                 </div>
-                <div class="section">
-                    <h3 style="text-align:center;margin-bottom:20px;color:#666;">能力雷达图</h3>
-                    <canvas id="radarChart" class="radar-chart"></canvas>
+                <div id="userLoggedIn" class="hidden">
+                    <div class="user-stats">
+                        <div class="stat-card">
+                            <h3>连续打卡</h3>
+                            <div class="value">5天</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>答题总数</h3>
+                            <div class="value" id="totalAnswered">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>正确率</h3>
+                            <div class="value" id="accuracyRate">0%</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>错题数量</h3>
+                            <div class="value" id="wrongCount">0</div>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h3 style="text-align:center;margin-bottom:20px;color:#666;">能力雷达图</h3>
+                        <canvas id="radarChart" class="radar-chart"></canvas>
+                    </div>
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>我的错题集</h2>
+                            <button class="btn btn-sm" onclick="clearWrongQuestions()" style="padding:8px 20px;font-size:0.9rem;">清空错题</button>
+                        </div>
+                        <div id="wrongQuestionsList" class="wrong-questions-list">
+                            <p style="text-align:center;color:#999;padding:40px;">暂无错题，继续加油！</p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -217,6 +242,48 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content auth-modal">
+            <span class="modal-close" onclick="closeLoginModal()">&times;</span>
+            <h2 style="text-align:center;color:#c41a1a;margin-bottom:30px;font-family:'KaiTi',serif;">用户登录</h2>
+            <div class="auth-form">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码">
+                </div>
+                <button class="btn btn-block" onclick="login()">登录</button>
+                <p class="auth-switch">还没有账号？<a href="javascript:void(0)" onclick="switchToRegister()">立即注册</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-content auth-modal">
+            <span class="modal-close" onclick="closeRegisterModal()">&times;</span>
+            <h2 style="text-align:center;color:#c41a1a;margin-bottom:30px;font-family:'KaiTi',serif;">用户注册</h2>
+            <div class="auth-form">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="registerUsername" placeholder="请输入用户名（3-20位）">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="registerPassword" placeholder="请输入密码（6-20位）">
+                </div>
+                <div class="form-group">
+                    <label>确认密码</label>
+                    <input type="password" id="registerPassword2" placeholder="请再次输入密码">
+                </div>
+                <button class="btn btn-block" onclick="register()">注册</button>
+                <p class="auth-switch">已有账号？<a href="javascript:void(0)" onclick="switchToLogin()">立即登录</a></p>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <p>诗韵智学 - 古诗词互动教学平台 | 传承中华诗词文化</p>
@@ -227,6 +294,6 @@
         </div>
     </footer>
 
-    <script src="./static/js/app.js?v=2"></script>
+    <script src="./static/js/app.js?v=3"></script>
 </body>
 </html>

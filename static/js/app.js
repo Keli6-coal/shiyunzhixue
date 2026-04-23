@@ -10,6 +10,8 @@ let gameKeyword = '';
 let totalAnswered = 0;
 let dataLoaded = false;
 let currentPoems = [];
+let currentUser = null;
+let wrongQuestions = [];
 
 async function loadData() {
     if (dataLoaded) return;
@@ -292,6 +294,15 @@ function selectAnswer(element, selected, correct) {
         </div>
     `;
     document.getElementById('nextBtn').style.display = 'inline-block';
+    
+    recordAnswer(isCorrect, {
+        type: 'fill_blank',
+        title: currentQuiz.poem.title,
+        dynasty: currentQuiz.poem.dynasty,
+        author: currentQuiz.poem.author_name,
+        question: document.getElementById('questionText').textContent,
+        answer: correct
+    });
 }
 
 function selectSortAnswer(element, index) {
@@ -332,6 +343,14 @@ function selectSortAnswer(element, index) {
         document.getElementById('nextBtn').style.display = 'inline-block';
         
         document.querySelectorAll('.quiz-option').forEach(opt => opt.onclick = null);
+        
+        recordAnswer(isCorrect, {
+            type: 'sort',
+            title: currentQuiz.poem.title,
+            dynasty: currentQuiz.poem.dynasty,
+            author: currentQuiz.poem.author_name,
+            correct: currentQuiz.correct
+        });
     }
 }
 
@@ -457,9 +476,303 @@ document.getElementById('gameInput').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') submitGameAnswer();
 });
 
+// ========== 用户登录注册功能 ==========
+
+function getUsers() {
+    const users = localStorage.getItem('shiyunzhixue_users');
+    return users ? JSON.parse(users) : {};
+}
+
+function saveUsers(users) {
+    localStorage.setItem('shiyunzhixue_users', JSON.stringify(users));
+}
+
+function showLoginModal() {
+    document.getElementById('loginModal').classList.add('active');
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+}
+
+function closeLoginModal() {
+    document.getElementById('loginModal').classList.remove('active');
+}
+
+function showRegisterModal() {
+    document.getElementById('registerModal').classList.add('active');
+    document.getElementById('registerUsername').value = '';
+    document.getElementById('registerPassword').value = '';
+    document.getElementById('registerPassword2').value = '';
+}
+
+function closeRegisterModal() {
+    document.getElementById('registerModal').classList.remove('active');
+}
+
+function switchToRegister() {
+    closeLoginModal();
+    setTimeout(() => showRegisterModal(), 200);
+}
+
+function switchToLogin() {
+    closeRegisterModal();
+    setTimeout(() => showLoginModal(), 200);
+}
+
+function register() {
+    const username = document.getElementById('registerUsername').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const password2 = document.getElementById('registerPassword2').value;
+    
+    if (!username || !password) {
+        alert('请填写用户名和密码');
+        return;
+    }
+    
+    if (username.length < 3 || username.length > 20) {
+        alert('用户名长度应为3-20位');
+        return;
+    }
+    
+    if (password.length < 6 || password.length > 20) {
+        alert('密码长度应为6-20位');
+        return;
+    }
+    
+    if (password !== password2) {
+        alert('两次输入的密码不一致');
+        return;
+    }
+    
+    const users = getUsers();
+    if (users[username]) {
+        alert('用户名已存在');
+        return;
+    }
+    
+    users[username] = {
+        password: password,
+        createdAt: new Date().toISOString(),
+        stats: {
+            totalAnswered: 0,
+            correctCount: 0,
+            wrongQuestions: []
+        }
+    };
+    
+    saveUsers(users);
+    alert('注册成功！请登录');
+    closeRegisterModal();
+    setTimeout(() => showLoginModal(), 200);
+}
+
+function login() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!username || !password) {
+        alert('请填写用户名和密码');
+        return;
+    }
+    
+    const users = getUsers();
+    if (!users[username]) {
+        alert('用户名不存在');
+        return;
+    }
+    
+    if (users[username].password !== password) {
+        alert('密码错误');
+        return;
+    }
+    
+    currentUser = username;
+    localStorage.setItem('shiyunzhixue_currentUser', username);
+    wrongQuestions = users[username].stats.wrongQuestions || [];
+    
+    closeLoginModal();
+    updateUIAfterLogin();
+    alert('登录成功！欢迎 ' + username);
+}
+
+function logout() {
+    currentUser = null;
+    wrongQuestions = [];
+    localStorage.removeItem('shiyunzhixue_currentUser');
+    updateUIAfterLogout();
+}
+
+function updateUIAfterLogin() {
+    document.getElementById('userAuth').classList.add('hidden');
+    document.getElementById('userInfo').classList.remove('hidden');
+    document.getElementById('displayUsername').textContent = currentUser;
+    document.getElementById('userNotLogin').classList.add('hidden');
+    document.getElementById('userLoggedIn').classList.remove('hidden');
+    updateUserStats();
+    renderWrongQuestions();
+}
+
+function updateUIAfterLogout() {
+    document.getElementById('userAuth').classList.remove('hidden');
+    document.getElementById('userInfo').classList.add('hidden');
+    document.getElementById('userNotLogin').classList.remove('hidden');
+    document.getElementById('userLoggedIn').classList.add('hidden');
+}
+
+function updateUserStats() {
+    if (!currentUser) return;
+    const users = getUsers();
+    const stats = users[currentUser].stats;
+    document.getElementById('totalAnswered').textContent = stats.totalAnswered || 0;
+    document.getElementById('wrongCount').textContent = (stats.wrongQuestions || []).length;
+    
+    const total = stats.totalAnswered || 0;
+    const correct = stats.correctCount || 0;
+    const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
+    document.getElementById('accuracyRate').textContent = rate + '%';
+}
+
+function saveWrongQuestion(question) {
+    if (!currentUser) return;
+    const users = getUsers();
+    if (!users[currentUser].stats.wrongQuestions) {
+        users[currentUser].stats.wrongQuestions = [];
+    }
+    
+    const exists = users[currentUser].stats.wrongQuestions.some(
+        q => q.title === question.title && q.type === question.type
+    );
+    
+    if (!exists) {
+        users[currentUser].stats.wrongQuestions.push({
+            ...question,
+            wrongTime: new Date().toISOString()
+        });
+    }
+    
+    saveUsers(users);
+    wrongQuestions = users[currentUser].stats.wrongQuestions;
+    updateUserStats();
+    renderWrongQuestions();
+}
+
+function renderWrongQuestions() {
+    const container = document.getElementById('wrongQuestionsList');
+    if (!container) return;
+    
+    if (!currentUser || wrongQuestions.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">暂无错题，继续加油！</p>';
+        return;
+    }
+    
+    let html = '';
+    wrongQuestions.forEach((q, index) => {
+        if (q.type === 'fill_blank') {
+            html += `
+                <div class="wrong-question-item">
+                    <div class="wrong-question-header">
+                        <span class="wrong-question-type">填空题</span>
+                        <span class="wrong-question-time">${new Date(q.wrongTime).toLocaleDateString()}</span>
+                    </div>
+                    <div class="wrong-question-content">
+                        <p><strong>《${q.title}》</strong> [${q.dynasty}] ${q.author}</p>
+                        <p style="color:#666;margin:10px 0;">题目：${q.question}</p>
+                        <p style="color:#c41a1a;">正确答案：<strong>${q.answer}</strong></p>
+                    </div>
+                    <button class="btn-remove" onclick="removeWrongQuestion(${index})">移除</button>
+                </div>
+            `;
+        } else if (q.type === 'sort') {
+            html += `
+                <div class="wrong-question-item">
+                    <div class="wrong-question-header">
+                        <span class="wrong-question-type">排序题</span>
+                        <span class="wrong-question-time">${new Date(q.wrongTime).toLocaleDateString()}</span>
+                    </div>
+                    <div class="wrong-question-content">
+                        <p><strong>《${q.title}》</strong> [${q.dynasty}] ${q.author}</p>
+                        <p style="color:#666;margin:10px 0;">请将以下诗句按正确顺序排列：</p>
+                        <div class="correct-order">
+                            <p style="color:#c41a1a;font-weight:bold;">正确顺序：</p>
+                            ${q.correct.map((line, i) => `<p>${i + 1}. ${line}</p>`).join('')}
+                        </div>
+                    </div>
+                    <button class="btn-remove" onclick="removeWrongQuestion(${index})">移除</button>
+                </div>
+            `;
+        }
+    });
+    
+    container.innerHTML = html;
+}
+
+function removeWrongQuestion(index) {
+    if (!currentUser) return;
+    const users = getUsers();
+    users[currentUser].stats.wrongQuestions.splice(index, 1);
+    saveUsers(users);
+    wrongQuestions = users[currentUser].stats.wrongQuestions;
+    updateUserStats();
+    renderWrongQuestions();
+}
+
+function clearWrongQuestions() {
+    if (!currentUser) return;
+    if (!confirm('确定要清空所有错题吗？')) return;
+    
+    const users = getUsers();
+    users[currentUser].stats.wrongQuestions = [];
+    saveUsers(users);
+    wrongQuestions = [];
+    updateUserStats();
+    renderWrongQuestions();
+}
+
+function recordAnswer(isCorrect, questionData) {
+    if (!currentUser) return;
+    
+    const users = getUsers();
+    users[currentUser].stats.totalAnswered = (users[currentUser].stats.totalAnswered || 0) + 1;
+    if (isCorrect) {
+        users[currentUser].stats.correctCount = (users[currentUser].stats.correctCount || 0) + 1;
+    } else {
+        saveWrongQuestion(questionData);
+    }
+    saveUsers(users);
+    updateUserStats();
+}
+
+// 点击模态框外部关闭
+document.getElementById('loginModal').addEventListener('click', function(e) {
+    if (e.target === this) closeLoginModal();
+});
+
+document.getElementById('registerModal').addEventListener('click', function(e) {
+    if (e.target === this) closeRegisterModal();
+});
+
+// 回车键提交
+document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') login();
+});
+
+document.getElementById('registerPassword2').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') register();
+});
+
 window.onload = () => {
     loadStats();
     loadFeaturedPoem();
     loadPoemList();
     drawRadarChart();
+    
+    // 检查登录状态
+    const savedUser = localStorage.getItem('shiyunzhixue_currentUser');
+    if (savedUser) {
+        const users = getUsers();
+        if (users[savedUser]) {
+            currentUser = savedUser;
+            wrongQuestions = users[savedUser].stats.wrongQuestions || [];
+            updateUIAfterLogin();
+        }
+    }
 };

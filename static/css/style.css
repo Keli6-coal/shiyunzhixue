@@ -803,3 +803,248 @@ footer a:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* ========== 用户登录注册样式 ========== */
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-auth {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-auth {
+    padding: 8px 20px;
+    border: 2px solid #c41a1a;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    background: white;
+    color: #c41a1a;
+}
+
+.btn-auth:hover {
+    background: #c41a1a;
+    color: white;
+}
+
+.btn-auth.btn-register {
+    background: #c41a1a;
+    color: white;
+}
+
+.btn-auth.btn-register:hover {
+    background: #a01515;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.username {
+    color: #c41a1a;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.btn-logout {
+    padding: 6px 16px;
+    border: 1px solid #999;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    background: white;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.btn-logout:hover {
+    border-color: #c41a1a;
+    color: #c41a1a;
+}
+
+.auth-modal {
+    max-width: 420px;
+}
+
+.auth-form {
+    padding: 10px 0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #c41a1a;
+}
+
+.btn-block {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.05rem;
+    margin-top: 10px;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.auth-switch a {
+    color: #c41a1a;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+/* ========== 错题集样式 ========== */
+
+.wrong-questions-list {
+    margin-top: 20px;
+}
+
+.wrong-question-item {
+    background: white;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.wrong-question-item:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    border-color: #c41a1a;
+}
+
+.wrong-question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.wrong-question-type {
+    background: #c41a1a;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.wrong-question-time {
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.wrong-question-content {
+    color: #333;
+    line-height: 1.8;
+}
+
+.wrong-question-content p {
+    margin: 5px 0;
+}
+
+.correct-order {
+    background: #fff5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border-left: 3px solid #c41a1a;
+}
+
+.correct-order p {
+    margin: 6px 0;
+    color: #333;
+}
+
+.btn-remove {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 4px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    color: #999;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s;
+}
+
+.btn-remove:hover {
+    border-color: #ff4d4f;
+    color: #ff4d4f;
+}
+
+.btn-sm {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+}
+
+@media screen and (max-width: 768px) {
+    .header-right {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header-search {
+        width: 100%;
+    }
+    
+    .header-search input {
+        width: 100%;
+    }
+    
+    .user-auth {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .auth-modal {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .wrong-question-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
