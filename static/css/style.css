@@ -814,12 +814,22 @@ footer a:hover {
     display: flex;
     align-items: center;
     gap: 15px;
+    position: relative;
+    z-index: 10;
 }
 
 .user-auth {
     display: flex;
     gap: 10px;
     align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    z-index: 10;
 }
 
 .btn-auth {
@@ -845,12 +855,6 @@ footer a:hover {
 
 .btn-auth.btn-register:hover {
     background: #a01515;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
 }
 
 .username {
