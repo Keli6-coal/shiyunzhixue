@@ -616,10 +616,14 @@ function login() {
 }
 
 function logout() {
+    console.log('logout function called');
+    if (!confirm('确定要退出登录吗？')) return;
+    
     currentUser = null;
     wrongQuestions = [];
     localStorage.removeItem('shiyunzhixue_currentUser');
     updateUIAfterLogout();
+    alert('已退出登录');
 }
 
 function updateUIAfterLogin() {
