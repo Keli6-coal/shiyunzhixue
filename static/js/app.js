@@ -799,4 +799,14 @@ window.onload = () => {
             updateUIAfterLogin();
         }
     }
+    
+    // 绑定退出按钮点击事件
+    const logoutBtn = document.querySelector('.btn-logout');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            logout();
+        });
+    }
 };
