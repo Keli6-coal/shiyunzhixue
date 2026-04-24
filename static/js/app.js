@@ -657,6 +657,13 @@ function updateUserStats() {
     
     const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
     document.getElementById('accuracyRate').textContent = rate + '%';
+    
+    // 计算连续打卡天数
+    const createdAt = new Date(users[currentUser].createdAt);
+    const now = new Date();
+    const diffDays = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
+    const streak = Math.min(diffDays + 1, total > 0 ? diffDays + 1 : 0);
+    document.getElementById('streakDays').textContent = (total > 0 ? streak : 0) + '天';
 }
 
 function saveWrongQuestion(question) {
