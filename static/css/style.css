@@ -868,9 +868,6 @@ footer a:hover {
     background: white;
     color: #666;
     transition: all 0.3s;
-    position: relative;
-    z-index: 101;
-    pointer-events: auto;
 }
 
 .btn-logout:hover {
