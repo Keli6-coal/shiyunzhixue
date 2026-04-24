@@ -647,11 +647,14 @@ function updateUserStats() {
     if (!currentUser) return;
     const users = getUsers();
     const stats = users[currentUser].stats;
-    document.getElementById('totalAnswered').textContent = stats.totalAnswered || 0;
-    document.getElementById('wrongCount').textContent = (stats.wrongQuestions || []).length;
     
-    const total = stats.totalAnswered || 0;
+    const wrongCount = (stats.wrongQuestions || []).length;
     const correct = stats.correctCount || 0;
+    const total = correct + wrongCount;
+    
+    document.getElementById('totalAnswered').textContent = total;
+    document.getElementById('wrongCount').textContent = wrongCount;
+    
     const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
     document.getElementById('accuracyRate').textContent = rate + '%';
 }
@@ -754,7 +757,6 @@ function recordAnswer(isCorrect, questionData) {
     if (!currentUser) return;
     
     const users = getUsers();
-    users[currentUser].stats.totalAnswered = (users[currentUser].stats.totalAnswered || 0) + 1;
     if (isCorrect) {
         users[currentUser].stats.correctCount = (users[currentUser].stats.correctCount || 0) + 1;
         saveUsers(users);
@@ -798,5 +800,15 @@ window.onload = () => {
             wrongQuestions = users[savedUser].stats.wrongQuestions || [];
             updateUIAfterLogin();
         }
+    }
+    
+    // 绑定退出按钮
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            logout();
+        });
     }
 };
